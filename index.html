@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>対抗戦コイン ミツモルさん（仮）</title>
+  <meta
+    name="description"
+    content="ブルーアーカイブの戦術対抗戦コインについて、日ごとの収入・支出・残数と、文字交換に回せるコイン枚数を試算できる静的Webアプリのプロトタイプです。"
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  >
+  <style>
+    :root {
+      --bg-top: #e7f5ff;
+      --bg-bottom: #f8fbff;
+      --ink: #18324a;
+      --muted: #5b7288;
+      --line: rgba(43, 86, 122, 0.16);
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-strong: rgba(255, 255, 255, 0.98);
+      --primary: #1677c8;
+      --primary-deep: #0c568f;
+      --accent: #ffd16a;
+      --accent-soft: #fff4cd;
+      --positive: #167e57;
+      --negative: #c54343;
+      --shadow: 0 24px 60px rgba(29, 77, 117, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(140, 214, 255, 0.52), transparent 34%),
+        radial-gradient(circle at top right, rgba(255, 216, 120, 0.24), transparent 28%),
+        linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      border-radius: 999px;
+      filter: blur(24px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      width: 240px;
+      height: 240px;
+      right: -50px;
+      top: 88px;
+      background: rgba(115, 196, 255, 0.26);
+    }
+
+    body::after {
+      width: 200px;
+      height: 200px;
+      left: -30px;
+      bottom: 90px;
+      background: rgba(255, 209, 106, 0.22);
+    }
+
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 28px 18px 56px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 34px;
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(135deg, rgba(10, 96, 165, 0.92), rgba(32, 145, 205, 0.88)),
+        linear-gradient(160deg, rgba(255, 255, 255, 0.14), transparent);
+      color: #f5fbff;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -72px auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 44px;
+      transform: rotate(20deg);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0));
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 4vw, 46px);
+      line-height: 1.14;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-copy {
+      max-width: 780px;
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.8;
+      color: rgba(245, 251, 255, 0.92);
+    }
+
+    .app-layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      gap: 22px;
+      margin-top: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      min-height: 0;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.56);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .input-panel {
+      padding: 26px;
+    }
+
+    .results-panel {
+      padding: 26px;
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.25;
+    }
+
+    form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .field-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 252, 255, 0.84));
+    }
+
+    .field-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .field-helper {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .input-row,
+    .input-grid,
+    .inline-grid,
+    .income-grid,
+    .period-choice-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .inline-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .income-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .period-choice-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .number-wrap,
+    .date-wrap,
+    .other-income-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    .unit-label,
+    .mini-label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input[type="number"],
+    input[type="date"] {
+      width: 100%;
+      min-height: 46px;
+      padding: 12px 14px;
+      border: 1px solid rgba(35, 73, 104, 0.18);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.96);
+      color: var(--ink);
+      font: inherit;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    input[type="number"]:focus,
+    input[type="date"]:focus {
+      outline: none;
+      border-color: rgba(22, 119, 200, 0.54);
+      box-shadow: 0 0 0 4px rgba(22, 119, 200, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .choice-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice-card {
+      display: grid;
+      gap: 8px;
+      padding: 14px 14px 13px;
+      border: 1px solid rgba(35, 73, 104, 0.12);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.74);
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .choice-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(22, 119, 200, 0.26);
+      box-shadow: 0 12px 28px rgba(23, 64, 104, 0.08);
+    }
+
+    .choice-card:has(input:checked) {
+      border-color: rgba(22, 119, 200, 0.52);
+      background: linear-gradient(180deg, rgba(233, 247, 255, 0.98), rgba(255, 252, 240, 0.96));
+      box-shadow: 0 12px 32px rgba(22, 119, 200, 0.14);
+    }
+
+    .income-option {
+      display: flex;
+      align-items: center;
+      min-height: 58px;
+      padding: 0 14px;
+    }
+
+    .compact-option {
+      display: flex;
+      align-items: center;
+      min-height: 58px;
+      padding: 0 14px;
+    }
+
+    .income-option-wide {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: minmax(110px, 160px) minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+    }
+
+    .choice-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+
+    .choice-copy {
+      margin-left: 28px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+      accent-color: var(--primary);
+    }
+
+    .other-income-wrap {
+      margin-top: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .other-income-wrap input:disabled {
+      color: var(--muted);
+      background: rgba(243, 248, 252, 0.92);
+      border-color: rgba(35, 73, 104, 0.12);
+    }
+
+    .custom-date-grid {
+      margin-top: 12px;
+    }
+
+    .toggle-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 0 2px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mini-card {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(35, 73, 104, 0.12);
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .radio-copy {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .action-bar {
+      display: grid;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .primary-button {
+      min-height: 52px;
+      border: 0;
+      border-radius: 18px;
+      padding: 0 18px;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      color: #f7fbff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+      cursor: pointer;
+      box-shadow: 0 18px 32px rgba(22, 119, 200, 0.24);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    }
+
+    .primary-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 36px rgba(22, 119, 200, 0.28);
+      filter: brightness(1.02);
+    }
+
+    .action-helper {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .error-box,
+    .formula-strip,
+    .table-meta {
+      border-radius: 18px;
+    }
+
+    .error-box {
+      padding: 14px 16px;
+      color: #a13434;
+      background: rgba(255, 233, 233, 0.92);
+      border: 1px solid rgba(197, 67, 67, 0.24);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .summary-card {
+      display: grid;
+      gap: 8px;
+      min-height: 150px;
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .summary-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .summary-card strong {
+      font-size: clamp(28px, 3vw, 38px);
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+
+    .summary-card span {
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .summary-card.primary {
+      background:
+        linear-gradient(150deg, rgba(22, 119, 200, 0.98), rgba(10, 86, 143, 0.96)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: #f6fbff;
+    }
+
+    .summary-card.primary p,
+    .summary-card.primary span {
+      color: rgba(246, 251, 255, 0.88);
+    }
+
+    .summary-card.primary strong {
+      color: #fff7df;
+    }
+
+    .summary-card[data-tone="negative"] strong {
+      color: var(--negative);
+    }
+
+    .formula-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: stretch;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      background: linear-gradient(180deg, rgba(255, 248, 220, 0.88), rgba(255, 255, 255, 0.94));
+      border: 1px solid rgba(255, 209, 106, 0.34);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .formula-term {
+      display: grid;
+      gap: 4px;
+      min-width: 120px;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .formula-term strong {
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .formula-term span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .formula-term.is-result strong {
+      color: var(--primary-deep);
+    }
+
+    .formula-strip[data-tone="negative"] .formula-term.is-result strong {
+      color: var(--negative);
+    }
+
+    .formula-operator {
+      display: grid;
+      place-items: center;
+      min-width: 20px;
+      color: var(--primary-deep);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(22, 119, 200, 0.08);
+      color: var(--primary-deep);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .results-block + .results-block {
+      margin-top: 18px;
+    }
+
+    .block-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-end;
+      margin-bottom: 12px;
+    }
+
+    .block-heading h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .table-meta {
+      padding: 12px 14px;
+      background: rgba(22, 119, 200, 0.06);
+      border: 1px solid rgba(22, 119, 200, 0.14);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .table-shell {
+      margin-top: 12px;
+      overflow: auto;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: var(--panel-strong);
+    }
+
+    table {
+      width: 100%;
+      min-width: 620px;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      padding: 14px 16px;
+      background: #eef7ff;
+      color: var(--primary-deep);
+      font-size: 13px;
+      text-align: left;
+      border-bottom: 1px solid rgba(43, 86, 122, 0.12);
+    }
+
+    tbody td {
+      padding: 14px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(43, 86, 122, 0.08);
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(244, 250, 255, 0.7);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .numeric {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .row-final-day {
+      background: linear-gradient(180deg, rgba(255, 248, 220, 0.82), rgba(255, 255, 255, 0.94));
+      font-weight: 700;
+    }
+
+    .balance-negative,
+    .signed-negative {
+      color: var(--negative);
+    }
+
+    .signed-positive {
+      color: var(--positive);
+    }
+
+    details {
+      margin-top: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.78);
+      overflow: hidden;
+    }
+
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+      list-style: none;
+      padding: 16px 18px;
+      font-weight: 700;
+    }
+
+    summary::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: rgba(22, 119, 200, 0.08);
+      color: var(--primary-deep);
+      font-size: 20px;
+      font-weight: 700;
+      flex: none;
+    }
+
+    details[open] summary::after {
+      content: "-";
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .details-body {
+      padding: 0 18px 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .details-body p {
+      margin: 0 0 10px;
+    }
+
+    .details-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    .details-body-table {
+      padding-top: 0;
+    }
+
+    .details-body-table .table-meta {
+      margin-bottom: 12px;
+    }
+
+    @media (min-width: 1101px) {
+      .input-panel,
+      .results-panel {
+        position: sticky;
+        top: 22px;
+        max-height: calc(100vh - 44px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .input-panel {
+        position: static;
+      }
+
+      .results-panel {
+        position: static;
+        max-height: none;
+        overflow: visible;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page-shell {
+        padding: 16px 12px 40px;
+      }
+
+      .hero,
+      .input-panel,
+      .results-panel {
+        padding: 20px;
+      }
+
+      .section-heading {
+        display: grid;
+      }
+
+      .inline-grid,
+      .mini-grid,
+      .summary-grid,
+      .income-grid,
+      .period-choice-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .income-option-wide {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 30px;
+      }
+
+      .summary-card {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <h1>対抗戦コイン ミツモルさん（仮）</h1>
+      <p class="hero-copy">
+        集計期間のあいだに毎日どれだけコインが増減するかを確認しながら、
+        最終的に文字交換へ回してよい対抗戦コインの目安を試算します。
+      </p>
+    </header>
+
+    <main class="app-layout">
+      <section class="panel input-panel">
+        <div class="section-heading">
+          <div>
+            <h2>計算条件</h2>
+          </div>
+        </div>
+
+        <form id="plannerForm" novalidate>
+          <div class="field-card">
+            <h3>現在の戦術対抗戦コイン数</h3>
+            <div class="number-wrap">
+              <span class="unit-label">コイン枚数</span>
+              <input id="currentCoins" name="currentCoins" type="number" min="0" step="1" inputmode="numeric" value="" placeholder="0">
+            </div>
+          </div>
+
+          <div class="field-card">
+            <h3>集計期間</h3>
+            <div class="period-choice-grid">
+              <label class="choice-card compact-option">
+                <span class="choice-main"><input type="radio" name="periodMode" value="one-month" checked>1か月</span>
+              </label>
+              <label class="choice-card compact-option">
+                <span class="choice-main"><input type="radio" name="periodMode" value="three-months">3か月</span>
+              </label>
+              <label class="choice-card compact-option">
+                <span class="choice-main"><input type="radio" name="periodMode" value="half-year">半年</span>
+              </label>
+              <label class="choice-card compact-option">
+                <span class="choice-main"><input type="radio" name="periodMode" value="summer-half-anniversary">夏のハーフアニバーサリーまで</span>
+              </label>
+              <label class="choice-card compact-option">
+                <span class="choice-main"><input type="radio" name="periodMode" value="winter-anniversary">冬のアニバーサリーまで</span>
+              </label>
+              <label class="choice-card compact-option">
+                <span class="choice-main"><input type="radio" name="periodMode" value="custom">日付を指定する</span>
+              </label>
+            </div>
+            <div id="customDateFields" class="inline-grid custom-date-grid" hidden>
+              <div class="date-wrap">
+                <span class="unit-label">開始日</span>
+                <input id="startDate" name="startDate" type="date">
+              </div>
+              <div class="date-wrap">
+                <span class="unit-label">終了日</span>
+                <input id="endDate" name="endDate" type="date">
+              </div>
+            </div>
+          </div>
+
+          <div class="field-card">
+            <h3>毎日のコイン収入</h3>
+            <div class="income-grid">
+              <label class="choice-card income-option">
+                <span class="choice-main"><input type="radio" name="dailyIncome" value="80" checked>80</span>
+              </label>
+              <label class="choice-card income-option">
+                <span class="choice-main"><input type="radio" name="dailyIncome" value="90">90</span>
+              </label>
+              <label class="choice-card income-option">
+                <span class="choice-main"><input type="radio" name="dailyIncome" value="100">100</span>
+              </label>
+              <label class="choice-card income-option">
+                <span class="choice-main"><input type="radio" name="dailyIncome" value="110">110</span>
+              </label>
+              <label class="choice-card income-option">
+                <span class="choice-main"><input type="radio" name="dailyIncome" value="120">120</span>
+              </label>
+              <label class="choice-card income-option">
+                <span class="choice-main"><input type="radio" name="dailyIncome" value="125">125</span>
+              </label>
+              <label class="choice-card income-option income-option-wide">
+                <span class="choice-main"><input type="radio" name="dailyIncome" value="other">その他</span>
+                <span id="otherIncomeWrap" class="other-income-wrap">
+                  <input id="customDailyIncome" name="customDailyIncome" type="number" min="0" step="1" inputmode="numeric" placeholder="任意の整数値を入力" disabled>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field-card">
+            <h3>毎日ドリンク1セット購入</h3>
+            <p class="field-helper">チェックすると、毎日の支出に45コインを追加</p>
+            <label class="toggle-line">
+              <input id="buyDailyDrink" name="buyDailyDrink" type="checkbox">
+              毎日ドリンク1セット購入する
+            </label>
+          </div>
+
+          <div class="field-card">
+            <h3>毎日文字購入</h3>
+            <div class="choice-grid">
+              <label class="choice-card compact-option">
+                <span class="choice-main"><input type="radio" name="dailyCharacterPurchase" value="none" checked>文字購入はしない</span>
+              </label>
+              <label class="choice-card compact-option">
+                <span class="choice-main"><input type="radio" name="dailyCharacterPurchase" value="one">毎日1名分の文字購入</span>
+              </label>
+              <label class="choice-card compact-option">
+                <span class="choice-main"><input type="radio" name="dailyCharacterPurchase" value="two">毎日2名分の文字購入</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field-card">
+            <h3>追加のAPドリンク購入期間</h3>
+            <p class="field-helper">追加でAPドリンクを何週間購入するかを入力します。集計期間最終日の残数から別枠で差し引きます。</p>
+            <div class="mini-grid">
+              <div class="mini-card">
+                <strong>APドリンク1セット<br>(45コイン)</strong>
+                <div class="number-wrap">
+                  <span class="mini-label">週数</span>
+                  <input id="apOneWeeks" name="apOneWeeks" type="number" min="0" step="1" inputmode="numeric" value="0">
+                </div>
+              </div>
+              <div class="mini-card">
+                <strong>APドリンク4セット<br>(210コイン)</strong>
+                <div class="number-wrap">
+                  <span class="mini-label">週数</span>
+                  <input id="apFourWeeks" name="apFourWeeks" type="number" min="0" step="1" inputmode="numeric" value="0">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-card">
+            <h3>集計期間後のコイン余力</h3>
+            <p class="field-helper">集計期間後の突発的なおいしいイベントへ備えを、最終日の残数からさらに引きます。</p>
+            <div class="choice-grid">
+              <label class="choice-card">
+                <span class="choice-main"><input type="radio" name="bufferPolicy" value="use-all" checked>使い切ってヨシ！</span>
+                <span class="choice-copy">余力 = 0</span>
+              </label>
+              <label class="choice-card">
+                <span class="choice-main"><input type="radio" name="bufferPolicy" value="two-weeks">2週間のドリンク4セット</span>
+                <span class="choice-copy">余力 = (2 × 7 × 210) - (14 × 毎日のコイン収入)</span>
+              </label>
+              <label class="choice-card">
+                <span class="choice-main"><input type="radio" name="bufferPolicy" value="three-weeks">3週間のドリンク4セット</span>
+                <span class="choice-copy">余力 = (3 × 7 × 210) - (21 × 毎日のコイン収入)</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="errorBox" class="error-box" hidden aria-live="polite"></div>
+
+          <div class="action-bar">
+            <button class="primary-button" type="submit">集計する</button>
+            <p class="action-helper">日付や条件を変えたあと、ボタンを押すとすぐ再計算できます。</p>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel results-panel" aria-live="polite">
+        <div class="section-heading">
+          <div>
+            <h2>集計結果</h2>
+          </div>
+        </div>
+
+        <div id="summaryGrid" class="summary-grid"></div>
+        <div id="formulaStrip" class="formula-strip"></div>
+        <div id="conditionChips" class="chip-row"></div>
+
+        <div class="results-block">
+          <details id="dailyTableDetails">
+            <summary>日次集計表</summary>
+            <div class="details-body details-body-table">
+              <div id="tableMeta" class="table-meta"></div>
+              <div class="table-shell">
+                <table id="projectionTable">
+                  <thead>
+                    <tr>
+                      <th scope="col">日付</th>
+                      <th scope="col" class="numeric">コイン収入</th>
+                      <th scope="col" class="numeric">支出</th>
+                      <th scope="col" class="numeric">残数</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <details>
+          <summary>実装している計算式をみる</summary>
+          <div class="details-body">
+            <p>初日: 残数 = 現在の戦術対抗戦コイン数 + 毎日のコイン収入 - (毎日ドリンク1セット購入の支出 + 毎日文字購入の支出)</p>
+            <p>2日目以降: 残数 = 前日の残数 + 毎日のコイン収入 - (毎日ドリンク1セット購入の支出 + 毎日文字購入の支出)</p>
+            <p>文字交換に使用してよい対抗戦コイン = 最終日の残数 - 追加のAPドリンク購入期間 - 余力</p>
+            <p>追加のAPドリンク購入期間 = APドリンク1セットの週数 × 7 × 45 + APドリンク4セットの週数 × 7 × 210</p>
+            <p>余力 = ドリンク4セットの必要コイン - 集計期間後に見込める毎日のコイン収入 として計算しています。</p>
+          </div>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const BUFFER_POLICIES = {
+      "use-all": {
+        label: "使い切ってヨシ！",
+        summaryLabel: "使い切ってヨシ！",
+        formula: "0",
+        calculate: () => 0
+      },
+      "two-weeks": {
+        label: "2週間のドリンク4セット",
+        summaryLabel: "2週間　ドリンク4セット分",
+        formula: "(2 × 7 × 210) - (14 × 毎日のコイン収入)",
+        calculate: (dailyIncome) => (2 * 7 * 210) - (14 * dailyIncome)
+      },
+      "three-weeks": {
+        label: "3週間のドリンク4セット",
+        summaryLabel: "3週間　ドリンク4セット分",
+        formula: "(3 × 7 × 210) - (21 × 毎日のコイン収入)",
+        calculate: (dailyIncome) => (3 * 7 * 210) - (21 * dailyIncome)
+      }
+    };
+
+    const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+    const PERIOD_MODES = {
+      "one-month": {
+        label: "1か月",
+        getRange: (today) => ({
+          startDate: today,
+          endDate: addMonthsClamped(today, 1)
+        })
+      },
+      "three-months": {
+        label: "3か月",
+        getRange: (today) => ({
+          startDate: today,
+          endDate: addMonthsClamped(today, 3)
+        })
+      },
+      "half-year": {
+        label: "半年",
+        getRange: (today) => ({
+          startDate: today,
+          endDate: addMonthsClamped(today, 6)
+        })
+      },
+      "summer-half-anniversary": {
+        label: "夏のハーフアニバーサリーまで",
+        getRange: (today) => ({
+          startDate: today,
+          endDate: getNextSummerHalfAnniversary(today)
+        })
+      },
+      "winter-anniversary": {
+        label: "冬のアニバーサリーまで",
+        getRange: (today) => ({
+          startDate: today,
+          endDate: getNextWinterAnniversary(today)
+        })
+      }
+    };
+
+    function parseIntegerField(value) {
+      const text = String(value ?? "").trim();
+      if (!/^-?\d+$/.test(text)) {
+        return NaN;
+      }
+      return Number(text);
+    }
+
+    function parseDateInput(value) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return null;
+      }
+
+      const [year, month, day] = value.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        return null;
+      }
+
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+
+    function addDays(date, amount) {
+      const next = new Date(date);
+      next.setDate(next.getDate() + amount);
+      return next;
+    }
+
+    function getToday() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return today;
+    }
+
+    function addMonthsClamped(date, months) {
+      const targetMonthStart = new Date(date.getFullYear(), date.getMonth() + months, 1);
+      const lastDay = new Date(
+        targetMonthStart.getFullYear(),
+        targetMonthStart.getMonth() + 1,
+        0
+      ).getDate();
+
+      return new Date(
+        targetMonthStart.getFullYear(),
+        targetMonthStart.getMonth(),
+        Math.min(date.getDate(), lastDay)
+      );
+    }
+
+    function getNthWeekdayOfMonth(year, monthIndex, weekday, nth) {
+      const firstDay = new Date(year, monthIndex, 1);
+      const offset = (weekday - firstDay.getDay() + 7) % 7;
+      return new Date(year, monthIndex, 1 + offset + (nth - 1) * 7);
+    }
+
+    function getNextSummerHalfAnniversary(startDate) {
+      let year = startDate.getFullYear();
+      let target = getNthWeekdayOfMonth(year, 6, 2, 4);
+
+      if (target < startDate) {
+        year += 1;
+        target = getNthWeekdayOfMonth(year, 6, 2, 4);
+      }
+
+      target.setHours(0, 0, 0, 0);
+      return target;
+    }
+
+    function getNextWinterAnniversary(startDate) {
+      let year = startDate.getFullYear();
+      let target = getNthWeekdayOfMonth(year, 0, 1, 4);
+
+      if (target < startDate) {
+        year += 1;
+        target = getNthWeekdayOfMonth(year, 0, 1, 4);
+      }
+
+      target.setHours(0, 0, 0, 0);
+      return target;
+    }
+
+    function toISODate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatNumber(value) {
+      return Number(value).toLocaleString("ja-JP");
+    }
+
+    function formatSigned(value) {
+      if (value > 0) {
+        return `+${formatNumber(value)}`;
+      }
+      if (value < 0) {
+        return `-${formatNumber(Math.abs(value))}`;
+      }
+      return "0";
+    }
+
+    function formatDateLabel(date) {
+      return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")} (${WEEKDAYS[date.getDay()]})`;
+    }
+
+    function readSettingsFromForm() {
+      const currentCoinsInput = document.getElementById("currentCoins").value.trim();
+      const currentCoins = currentCoinsInput === "" ? 0 : parseIntegerField(currentCoinsInput);
+      if (!Number.isInteger(currentCoins) || currentCoins < 0) {
+        throw new Error("現在の戦術対抗戦コイン数は0以上の整数で入力してください。");
+      }
+
+      const periodModeChoice = document.querySelector('input[name="periodMode"]:checked');
+      if (!periodModeChoice) {
+        throw new Error("集計期間を選択してください。");
+      }
+
+      let startDate;
+      let endDate;
+
+      if (periodModeChoice.value === "custom") {
+        startDate = parseDateInput(document.getElementById("startDate").value);
+        endDate = parseDateInput(document.getElementById("endDate").value);
+
+        if (!startDate || !endDate) {
+          throw new Error("開始日と終了日を入力してください。");
+        }
+
+        if (startDate > endDate) {
+          throw new Error("終了日は開始日以降の日付を指定してください。");
+        }
+      } else {
+        const periodMode = PERIOD_MODES[periodModeChoice.value];
+        if (!periodMode) {
+          throw new Error("集計期間を選択してください。");
+        }
+
+        const { startDate: resolvedStartDate, endDate: resolvedEndDate } = periodMode.getRange(getToday());
+        startDate = resolvedStartDate;
+        endDate = resolvedEndDate;
+      }
+
+      const dailyIncomeChoice = document.querySelector('input[name="dailyIncome"]:checked');
+      if (!dailyIncomeChoice) {
+        throw new Error("毎日のコイン収入を選択してください。");
+      }
+
+      let dailyIncome;
+      if (dailyIncomeChoice.value === "other") {
+        dailyIncome = parseIntegerField(document.getElementById("customDailyIncome").value);
+        if (!Number.isInteger(dailyIncome) || dailyIncome < 0) {
+          throw new Error("「その他」の毎日のコイン収入は0以上の整数で入力してください。");
+        }
+      } else {
+        dailyIncome = Number(dailyIncomeChoice.value);
+      }
+
+      const apOneWeeks = parseIntegerField(document.getElementById("apOneWeeks").value);
+      if (!Number.isInteger(apOneWeeks) || apOneWeeks < 0) {
+        throw new Error("APドリンク1セットの週数は0以上の整数で入力してください。");
+      }
+
+      const apFourWeeks = parseIntegerField(document.getElementById("apFourWeeks").value);
+      if (!Number.isInteger(apFourWeeks) || apFourWeeks < 0) {
+        throw new Error("APドリンク4セットの週数は0以上の整数で入力してください。");
+      }
+
+      const bufferChoice = document.querySelector('input[name="bufferPolicy"]:checked');
+      if (!bufferChoice || !BUFFER_POLICIES[bufferChoice.value]) {
+        throw new Error("集計期間後のコイン余力を選択してください。");
+      }
+
+      const characterPurchaseChoice = document.querySelector('input[name="dailyCharacterPurchase"]:checked');
+      if (!characterPurchaseChoice) {
+        throw new Error("毎日文字購入を選択してください。");
+      }
+
+      return {
+        currentCoins,
+        startDate,
+        endDate,
+        periodMode: periodModeChoice.value,
+        dailyIncome,
+        buyDailyDrink: document.getElementById("buyDailyDrink").checked,
+        dailyCharacterPurchase: characterPurchaseChoice.value,
+        apOneWeeks,
+        apFourWeeks,
+        bufferPolicy: bufferChoice.value
+      };
+    }
+
+    function buildProjection(settings) {
+      const dailyDrinkExpense = settings.buyDailyDrink ? 45 : 0;
+      const dailyCharacterExpense = settings.dailyCharacterPurchase === "one"
+        ? 50
+        : settings.dailyCharacterPurchase === "two"
+          ? 100
+          : 0;
+      const dailyExpense = dailyDrinkExpense + dailyCharacterExpense;
+      const records = [];
+      let balance = settings.currentCoins;
+      let cursor = new Date(settings.startDate);
+
+      while (cursor <= settings.endDate) {
+        balance += settings.dailyIncome - dailyExpense;
+        records.push({
+          date: new Date(cursor),
+          income: settings.dailyIncome,
+          expense: dailyExpense,
+          balance
+        });
+        cursor = addDays(cursor, 1);
+      }
+
+      const additionalReserve =
+        settings.apOneWeeks * 7 * 45 +
+        settings.apFourWeeks * 7 * 210;
+      const bufferPolicy = BUFFER_POLICIES[settings.bufferPolicy];
+      const bufferReserve = bufferPolicy.calculate(settings.dailyIncome);
+      const exchangeableCoins = balance - additionalReserve - bufferReserve;
+      const purchasedCharacters = settings.dailyCharacterPurchase === "none"
+        ? 0
+        : 5 * records.length;
+      const characterPurchaseLabel = settings.dailyCharacterPurchase === "one"
+        ? "毎日1名分の文字購入"
+        : settings.dailyCharacterPurchase === "two"
+          ? "毎日2名分の文字購入"
+          : "";
+
+      return {
+        records,
+        dailyExpense,
+        dailyDrinkExpense,
+        dailyCharacterExpense,
+        days: records.length,
+        totalIncome: settings.dailyIncome * records.length,
+        totalExpense: dailyExpense * records.length,
+        finalBalance: balance,
+        additionalReserve,
+        bufferReserve,
+        exchangeableCoins,
+        bufferLabel: bufferPolicy.label,
+        bufferSummaryLabel: bufferPolicy.summaryLabel,
+        bufferFormula: bufferPolicy.formula,
+        purchasedCharacters,
+        characterPurchaseLabel
+      };
+    }
+
+    function getSignedClass(value) {
+      if (value > 0) {
+        return "signed-positive";
+      }
+      if (value < 0) {
+        return "signed-negative";
+      }
+      return "";
+    }
+
+    function renderSummary(settings, result) {
+      const summaryGrid = document.getElementById("summaryGrid");
+      const formulaStrip = document.getElementById("formulaStrip");
+      const conditionChips = document.getElementById("conditionChips");
+      const tableMeta = document.getElementById("tableMeta");
+
+      summaryGrid.innerHTML = `
+        <article class="summary-card primary" data-tone="${result.exchangeableCoins < 0 ? "negative" : "positive"}">
+          <p>文字交換に使用してよい対抗戦コイン</p>
+          <strong>${formatNumber(result.exchangeableCoins)}</strong>
+          <span>最終日の残数から、追加AP確保分と余力を差し引いた値</span>
+        </article>
+        <article class="summary-card" data-tone="${result.finalBalance < 0 ? "negative" : "positive"}">
+          <p>最終日の残数</p>
+          <strong>${formatNumber(result.finalBalance)}</strong>
+          <span>${formatNumber(settings.currentCoins)}から${result.days}日ぶんを積み上げた結果</span>
+        </article>
+        <article class="summary-card" data-tone="${result.additionalReserve < 0 ? "negative" : "positive"}">
+          <p>追加のAPドリンク購入期間</p>
+          <strong>${formatNumber(result.additionalReserve)}</strong>
+          <span>1セット ${settings.apOneWeeks}週 / 4セット ${settings.apFourWeeks}週</span>
+        </article>
+        <article class="summary-card" data-tone="${result.bufferReserve < 0 ? "negative" : "positive"}">
+          <p>集計期間後のコイン余力</p>
+          <strong>${formatNumber(result.bufferReserve)}</strong>
+          <span>${result.bufferSummaryLabel}</span>
+        </article>
+      `;
+
+      formulaStrip.dataset.tone = result.exchangeableCoins < 0 ? "negative" : "positive";
+      formulaStrip.innerHTML = `
+        <div class="formula-term">
+          <strong>${formatNumber(result.finalBalance)}</strong>
+          <span>最終日の残数</span>
+        </div>
+        <div class="formula-operator">-</div>
+        <div class="formula-term">
+          <strong>${formatNumber(result.additionalReserve)}</strong>
+          <span>追加AP確保分</span>
+        </div>
+        <div class="formula-operator">-</div>
+        <div class="formula-term">
+          <strong>${formatNumber(result.bufferReserve)}</strong>
+          <span>余力</span>
+        </div>
+        <div class="formula-operator">=</div>
+        <div class="formula-term is-result">
+          <strong>${formatNumber(result.exchangeableCoins)}</strong>
+          <span>使用してよいコイン</span>
+        </div>
+      `;
+
+      const chips = [
+        `<span class="chip">集計日数 ${result.days}日</span>`,
+        `<span class="chip">毎日収入 ${formatNumber(settings.dailyIncome)}</span>`,
+        `<span class="chip">毎日ドリンク1セット ${settings.buyDailyDrink ? "あり" : "なし"}</span>`
+      ];
+
+      if (result.characterPurchaseLabel) {
+        chips.push(`<span class="chip">${result.characterPurchaseLabel}</span>`);
+      }
+
+      chips.push(
+        `<span class="chip">日次支出 ${formatNumber(result.dailyExpense)}</span>`,
+        `<span class="chip">期間収入合計 ${formatNumber(result.totalIncome)}</span>`,
+        `<span class="chip">期間支出合計 ${formatNumber(result.totalExpense)}</span>`
+      );
+
+      if (result.purchasedCharacters > 0) {
+        chips.push(`<span class="chip">購入文字数 ${formatNumber(result.purchasedCharacters)}</span>`);
+      }
+
+      conditionChips.innerHTML = chips.join("");
+
+      tableMeta.innerHTML = `
+        集計期間は <strong>${formatDateLabel(settings.startDate)}</strong> から
+        <strong>${formatDateLabel(settings.endDate)}</strong> までの ${result.days}日です。
+        日次表の残数は毎日「前日残数 + 収入 - 支出」で更新しています。
+      `;
+    }
+
+    function renderTable(result) {
+      const tableBody = document.querySelector("#projectionTable tbody");
+
+      tableBody.innerHTML = result.records.map((record, index) => `
+        <tr class="${index === result.records.length - 1 ? "row-final-day" : ""}">
+          <td>${formatDateLabel(record.date)}</td>
+          <td class="numeric ${getSignedClass(record.income)}">${formatSigned(record.income)}</td>
+          <td class="numeric ${record.expense > 0 ? "signed-negative" : ""}">${record.expense > 0 ? `-${formatNumber(record.expense)}` : "0"}</td>
+          <td class="numeric ${record.balance < 0 ? "balance-negative" : ""}">${formatNumber(record.balance)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function showError(message) {
+      const errorBox = document.getElementById("errorBox");
+      errorBox.textContent = message;
+      errorBox.hidden = false;
+    }
+
+    function clearError() {
+      const errorBox = document.getElementById("errorBox");
+      errorBox.hidden = true;
+      errorBox.textContent = "";
+    }
+
+    function recalculateAndRender() {
+      try {
+        const settings = readSettingsFromForm();
+        const result = buildProjection(settings);
+        clearError();
+        renderSummary(settings, result);
+        renderTable(result);
+      } catch (error) {
+        showError(error instanceof Error ? error.message : "入力を確認してください。");
+      }
+    }
+
+    function updateOtherIncomeState() {
+      const customDailyIncome = document.getElementById("customDailyIncome");
+      const selected = document.querySelector('input[name="dailyIncome"]:checked');
+      const useCustomIncome = selected && selected.value === "other";
+
+      customDailyIncome.disabled = !useCustomIncome;
+    }
+
+    function updatePeriodModeState() {
+      const customDateFields = document.getElementById("customDateFields");
+      const selected = document.querySelector('input[name="periodMode"]:checked');
+      const useCustomDates = selected && selected.value === "custom";
+
+      customDateFields.hidden = !useCustomDates;
+    }
+
+    function setDefaultDates() {
+      const startDateInput = document.getElementById("startDate");
+      const endDateInput = document.getElementById("endDate");
+
+      if (!startDateInput.value || !endDateInput.value) {
+        const today = getToday();
+
+        startDateInput.value = startDateInput.value || toISODate(today);
+        endDateInput.value = endDateInput.value || toISODate(addDays(today, 13));
+      }
+    }
+
+    function initApp() {
+      setDefaultDates();
+      updateOtherIncomeState();
+      updatePeriodModeState();
+      recalculateAndRender();
+
+      const form = document.getElementById("plannerForm");
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        recalculateAndRender();
+      });
+
+      form.addEventListener("change", (event) => {
+        if (!(event.target instanceof HTMLInputElement)) {
+          recalculateAndRender();
+          return;
+        }
+
+        if (event.target.name === "dailyIncome") {
+          updateOtherIncomeState();
+          if (event.target.value === "other" && document.getElementById("customDailyIncome").value.trim() === "") {
+            clearError();
+            return;
+          }
+        }
+
+        if (event.target.name === "periodMode") {
+          updatePeriodModeState();
+        }
+
+        recalculateAndRender();
+      });
+
+      form.addEventListener("input", (event) => {
+        if (!(event.target instanceof HTMLInputElement)) {
+          return;
+        }
+
+        if (event.target.name === "dailyIncome") {
+          updateOtherIncomeState();
+          return;
+        }
+
+        if (event.target.id === "customDailyIncome") {
+          if (event.target.value.trim() === "") {
+            clearError();
+            return;
+          }
+          recalculateAndRender();
+        }
+      });
+    }
+
+    if (typeof document !== "undefined") {
+      initApp();
+    }
+  </script>
+</body>
+</html>
