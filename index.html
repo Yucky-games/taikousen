@@ -1002,6 +1002,9 @@
               <label class="choice-card">
                 <span class="choice-main"><input type="radio" name="bufferPolicy" value="three-weeks">3週間のドリンク4セット</span>
               </label>
+              <label class="choice-card">
+                <span class="choice-main"><input type="radio" name="bufferPolicy" value="four-weeks">4週間のドリンク4セット</span>
+              </label>
             </div>
           </div>
 
@@ -1052,6 +1055,7 @@
             <p>余力: 使い切ってヨシ！ = 0</p>
             <p>余力: 2週間のドリンク4セット = (2 × 7 × 210) - (14 × 毎日のコイン収入)</p>
             <p>余力: 3週間のドリンク4セット = (3 × 7 × 210) - (21 × 毎日のコイン収入)</p>
+            <p>余力: 4週間のドリンク4セット = (4 × 7 × 210) - (28 × 毎日のコイン収入)</p>
           </div>
         </details>
       </section>
@@ -1078,6 +1082,12 @@
         summaryLabel: "3週間　ドリンク4セット分",
         formula: "(3 × 7 × 210) - (21 × 毎日のコイン収入)",
         calculate: (dailyIncome) => (3 * 7 * 210) - (21 * dailyIncome)
+      },
+      "four-weeks": {
+        label: "4週間のドリンク4セット",
+        summaryLabel: "4週間　ドリンク4セット分",
+        formula: "(4 × 7 × 210) - (28 × 毎日のコイン収入)",
+        calculate: (dailyIncome) => (4 * 7 * 210) - (28 * dailyIncome)
       }
     };
 
