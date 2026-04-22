@@ -119,6 +119,25 @@
       letter-spacing: 0.02em;
     }
 
+    .hero-credit {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      z-index: 1;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-credit a {
+      color: rgba(245, 251, 255, 0.92);
+      text-decoration: none;
+    }
+
+    .hero-credit a:hover {
+      text-decoration: underline;
+    }
+
     .hero-copy {
       max-width: 780px;
       margin: 0;
@@ -213,11 +232,16 @@
       gap: 10px;
     }
 
+    .period-option-wide {
+      grid-column: 1 / -1;
+    }
+
     .number-wrap,
     .date-wrap,
     .other-income-wrap {
       display: grid;
       gap: 8px;
+      min-width: 0;
     }
 
     .unit-label,
@@ -229,6 +253,7 @@
     input[type="number"],
     input[type="date"] {
       width: 100%;
+      min-width: 0;
       min-height: 46px;
       padding: 12px 14px;
       border: 1px solid rgba(35, 73, 104, 0.18);
@@ -334,6 +359,10 @@
       margin-top: 12px;
     }
 
+    .custom-date-grid[hidden] {
+      display: none;
+    }
+
     .toggle-line {
       display: flex;
       align-items: center;
@@ -351,6 +380,7 @@
     }
 
     .mini-card {
+      min-width: 0;
       padding: 14px;
       border-radius: 16px;
       border: 1px solid rgba(35, 73, 104, 0.12);
@@ -364,41 +394,72 @@
       line-height: 1.5;
     }
 
-    .radio-copy {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    .action-bar {
+    .stepper-field {
       display: grid;
-      gap: 10px;
-      margin-top: 2px;
+      gap: 8px;
     }
 
-    .primary-button {
-      min-height: 52px;
-      border: 0;
-      border-radius: 18px;
-      padding: 0 18px;
+    .stepper-controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-areas:
+        "input input"
+        "decrement increment";
+      gap: 6px;
+      align-items: stretch;
+      width: 100%;
+      max-width: 176px;
+    }
+
+    .stepper-input {
+      grid-area: input;
+      min-height: 48px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      font-size: 20px;
+      font-weight: 700;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .stepper-input::-webkit-outer-spin-button,
+    .stepper-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .stepper-input[type="number"] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    .stepper-button {
+      min-height: 36px;
+      border: 1px solid rgba(35, 73, 104, 0.16);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(238, 247, 255, 0.96), rgba(255, 255, 255, 0.96));
+      color: var(--primary-deep);
       font: inherit;
       font-size: 16px;
       font-weight: 700;
-      color: #f7fbff;
-      background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+      line-height: 1;
       cursor: pointer;
-      box-shadow: 0 18px 32px rgba(22, 119, 200, 0.24);
-      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
     }
 
-    .primary-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 20px 36px rgba(22, 119, 200, 0.28);
-      filter: brightness(1.02);
+    .stepper-button[data-step-delta="-1"] {
+      grid-area: decrement;
     }
 
-    .action-helper {
-      margin: 0;
+    .stepper-button[data-step-delta="1"] {
+      grid-area: increment;
+    }
+
+    .stepper-button:hover {
+      border-color: rgba(22, 119, 200, 0.3);
+      background: linear-gradient(180deg, rgba(227, 243, 255, 1), rgba(255, 255, 255, 1));
+    }
+
+    .radio-copy {
       color: var(--muted);
       font-size: 12px;
       line-height: 1.6;
@@ -651,8 +712,9 @@
 
     summary::after {
       content: "+";
-      display: grid;
-      place-items: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       width: 28px;
       height: 28px;
       border-radius: 999px;
@@ -660,6 +722,7 @@
       color: var(--primary-deep);
       font-size: 20px;
       font-weight: 700;
+      line-height: 1;
       flex: none;
     }
 
@@ -737,6 +800,11 @@
         padding: 20px;
       }
 
+      .hero-credit {
+        position: static;
+        margin-bottom: 12px;
+      }
+
       .section-heading {
         display: grid;
       }
@@ -753,6 +821,20 @@
         grid-template-columns: 1fr;
       }
 
+      .stepper-controls {
+        width: min(100%, 240px);
+      }
+
+      .stepper-button {
+        min-height: 44px;
+        font-size: 20px;
+      }
+
+      .stepper-input {
+        min-height: 50px;
+        font-size: 20px;
+      }
+
       .hero h1 {
         font-size: 30px;
       }
@@ -766,6 +848,9 @@
 <body>
   <div class="page-shell">
     <header class="hero">
+      <div class="hero-credit">
+        <a href="https://x.com/yucky_games" target="_blank" rel="noopener noreferrer">made by ゆっきー</a>
+      </div>
       <h1>対抗戦コイン ミツモルさん（仮）</h1>
       <p class="hero-copy">
         集計期間のあいだに毎日どれだけコインが増減するかを確認しながら、
@@ -800,15 +885,12 @@
                 <span class="choice-main"><input type="radio" name="periodMode" value="three-months">3か月</span>
               </label>
               <label class="choice-card compact-option">
-                <span class="choice-main"><input type="radio" name="periodMode" value="half-year">半年</span>
-              </label>
-              <label class="choice-card compact-option">
                 <span class="choice-main"><input type="radio" name="periodMode" value="summer-half-anniversary">夏のハーフアニバーサリーまで</span>
               </label>
               <label class="choice-card compact-option">
                 <span class="choice-main"><input type="radio" name="periodMode" value="winter-anniversary">冬のアニバーサリーまで</span>
               </label>
-              <label class="choice-card compact-option">
+              <label class="choice-card compact-option period-option-wide">
                 <span class="choice-main"><input type="radio" name="periodMode" value="custom">日付を指定する</span>
               </label>
             </div>
@@ -884,16 +966,24 @@
             <div class="mini-grid">
               <div class="mini-card">
                 <strong>APドリンク1セット<br>(45コイン)</strong>
-                <div class="number-wrap">
+                <div class="stepper-field">
                   <span class="mini-label">週数</span>
-                  <input id="apOneWeeks" name="apOneWeeks" type="number" min="0" step="1" inputmode="numeric" value="0">
+                  <div class="stepper-controls">
+                    <button class="stepper-button" type="button" data-step-target="apOneWeeks" data-step-delta="-1" aria-label="APドリンク1セットの週数を1減らす">-</button>
+                    <input id="apOneWeeks" class="stepper-input" name="apOneWeeks" type="number" min="0" step="1" inputmode="numeric" value="" placeholder="0">
+                    <button class="stepper-button" type="button" data-step-target="apOneWeeks" data-step-delta="1" aria-label="APドリンク1セットの週数を1増やす">+</button>
+                  </div>
                 </div>
               </div>
               <div class="mini-card">
                 <strong>APドリンク4セット<br>(210コイン)</strong>
-                <div class="number-wrap">
+                <div class="stepper-field">
                   <span class="mini-label">週数</span>
-                  <input id="apFourWeeks" name="apFourWeeks" type="number" min="0" step="1" inputmode="numeric" value="0">
+                  <div class="stepper-controls">
+                    <button class="stepper-button" type="button" data-step-target="apFourWeeks" data-step-delta="-1" aria-label="APドリンク4セットの週数を1減らす">-</button>
+                    <input id="apFourWeeks" class="stepper-input" name="apFourWeeks" type="number" min="0" step="1" inputmode="numeric" value="" placeholder="0">
+                    <button class="stepper-button" type="button" data-step-target="apFourWeeks" data-step-delta="1" aria-label="APドリンク4セットの週数を1増やす">+</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -905,25 +995,17 @@
             <div class="choice-grid">
               <label class="choice-card">
                 <span class="choice-main"><input type="radio" name="bufferPolicy" value="use-all" checked>使い切ってヨシ！</span>
-                <span class="choice-copy">余力 = 0</span>
               </label>
               <label class="choice-card">
                 <span class="choice-main"><input type="radio" name="bufferPolicy" value="two-weeks">2週間のドリンク4セット</span>
-                <span class="choice-copy">余力 = (2 × 7 × 210) - (14 × 毎日のコイン収入)</span>
               </label>
               <label class="choice-card">
                 <span class="choice-main"><input type="radio" name="bufferPolicy" value="three-weeks">3週間のドリンク4セット</span>
-                <span class="choice-copy">余力 = (3 × 7 × 210) - (21 × 毎日のコイン収入)</span>
               </label>
             </div>
           </div>
 
           <div id="errorBox" class="error-box" hidden aria-live="polite"></div>
-
-          <div class="action-bar">
-            <button class="primary-button" type="submit">集計する</button>
-            <p class="action-helper">日付や条件を変えたあと、ボタンを押すとすぐ再計算できます。</p>
-          </div>
         </form>
       </section>
 
@@ -960,14 +1042,16 @@
           </details>
         </div>
 
-        <details>
+        <details id="formulaDetails">
           <summary>実装している計算式をみる</summary>
           <div class="details-body">
             <p>初日: 残数 = 現在の戦術対抗戦コイン数 + 毎日のコイン収入 - (毎日ドリンク1セット購入の支出 + 毎日文字購入の支出)</p>
             <p>2日目以降: 残数 = 前日の残数 + 毎日のコイン収入 - (毎日ドリンク1セット購入の支出 + 毎日文字購入の支出)</p>
             <p>文字交換に使用してよい対抗戦コイン = 最終日の残数 - 追加のAPドリンク購入期間 - 余力</p>
             <p>追加のAPドリンク購入期間 = APドリンク1セットの週数 × 7 × 45 + APドリンク4セットの週数 × 7 × 210</p>
-            <p>余力 = ドリンク4セットの必要コイン - 集計期間後に見込める毎日のコイン収入 として計算しています。</p>
+            <p>余力: 使い切ってヨシ！ = 0</p>
+            <p>余力: 2週間のドリンク4セット = (2 × 7 × 210) - (14 × 毎日のコイン収入)</p>
+            <p>余力: 3週間のドリンク4セット = (3 × 7 × 210) - (21 × 毎日のコイン収入)</p>
           </div>
         </details>
       </section>
@@ -975,6 +1059,7 @@
   </div>
 
   <script>
+    const STORAGE_KEY = "bluearchive-tactical-coin-planner-state-v1";
     const BUFFER_POLICIES = {
       "use-all": {
         label: "使い切ってヨシ！",
@@ -1012,13 +1097,6 @@
           endDate: addMonthsClamped(today, 3)
         })
       },
-      "half-year": {
-        label: "半年",
-        getRange: (today) => ({
-          startDate: today,
-          endDate: addMonthsClamped(today, 6)
-        })
-      },
       "summer-half-anniversary": {
         label: "夏のハーフアニバーサリーまで",
         getRange: (today) => ({
@@ -1041,6 +1119,16 @@
         return NaN;
       }
       return Number(text);
+    }
+
+    function parseNonNegativeIntegerOrZero(value) {
+      const text = String(value ?? "").trim();
+      if (text === "") {
+        return 0;
+      }
+
+      const parsed = parseIntegerField(text);
+      return Number.isInteger(parsed) && parsed >= 0 ? parsed : NaN;
     }
 
     function parseDateInput(value) {
@@ -1147,9 +1235,124 @@
       return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")} (${WEEKDAYS[date.getDay()]})`;
     }
 
+    function formatInputValueOrBlank(value) {
+      return value > 0 ? String(value) : "";
+    }
+
+    function getExchangeableSummaryText(exchangeableCoins) {
+      if (exchangeableCoins > 0) {
+        const characterEquivalent = Math.floor((exchangeableCoins * 5) / 50);
+        const requiredDays = Math.floor(exchangeableCoins / 50);
+        return `${formatNumber(characterEquivalent)}文字相当。毎日購入で${formatNumber(requiredDays)}日必要`;
+      }
+      return "文字購入にあてられるコインがありません。";
+    }
+
+    function getSelectedRadioValue(name) {
+      const input = document.querySelector(`input[name="${name}"]:checked`);
+      return input ? input.value : "";
+    }
+
+    function setRadioValue(name, value) {
+      if (!value) {
+        return;
+      }
+      const input = document.querySelector(`input[name="${name}"][value="${value}"]`);
+      if (input) {
+        input.checked = true;
+      }
+    }
+
+    function collectPersistedState() {
+      return {
+        currentCoins: document.getElementById("currentCoins").value,
+        periodMode: getSelectedRadioValue("periodMode"),
+        startDate: document.getElementById("startDate").value,
+        endDate: document.getElementById("endDate").value,
+        dailyIncome: getSelectedRadioValue("dailyIncome"),
+        customDailyIncome: document.getElementById("customDailyIncome").value,
+        buyDailyDrink: document.getElementById("buyDailyDrink").checked,
+        dailyCharacterPurchase: getSelectedRadioValue("dailyCharacterPurchase"),
+        apOneWeeks: document.getElementById("apOneWeeks").value,
+        apFourWeeks: document.getElementById("apFourWeeks").value,
+        bufferPolicy: getSelectedRadioValue("bufferPolicy"),
+        dailyTableOpen: document.getElementById("dailyTableDetails").open,
+        formulaDetailsOpen: document.getElementById("formulaDetails").open
+      };
+    }
+
+    function savePersistedState() {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(collectPersistedState()));
+      } catch (_error) {
+        // localStorage unavailable
+      }
+    }
+
+    function restorePersistedState() {
+      try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return null;
+        }
+        return JSON.parse(raw);
+      } catch (_error) {
+        return null;
+      }
+    }
+
+    function applyPersistedState(state) {
+      if (!state || typeof state !== "object") {
+        return;
+      }
+
+      if (typeof state.currentCoins === "string") {
+        document.getElementById("currentCoins").value = state.currentCoins;
+      }
+
+      setRadioValue("periodMode", state.periodMode);
+
+      if (typeof state.startDate === "string" && state.startDate) {
+        document.getElementById("startDate").value = state.startDate;
+      }
+
+      if (typeof state.endDate === "string" && state.endDate) {
+        document.getElementById("endDate").value = state.endDate;
+      }
+
+      setRadioValue("dailyIncome", state.dailyIncome);
+
+      if (typeof state.customDailyIncome === "string") {
+        document.getElementById("customDailyIncome").value = state.customDailyIncome;
+      }
+
+      if (typeof state.buyDailyDrink === "boolean") {
+        document.getElementById("buyDailyDrink").checked = state.buyDailyDrink;
+      }
+
+      setRadioValue("dailyCharacterPurchase", state.dailyCharacterPurchase);
+
+      if (typeof state.apOneWeeks === "string") {
+        document.getElementById("apOneWeeks").value = state.apOneWeeks;
+      }
+
+      if (typeof state.apFourWeeks === "string") {
+        document.getElementById("apFourWeeks").value = state.apFourWeeks;
+      }
+
+      setRadioValue("bufferPolicy", state.bufferPolicy);
+
+      if (typeof state.dailyTableOpen === "boolean") {
+        document.getElementById("dailyTableDetails").open = state.dailyTableOpen;
+      }
+
+      if (typeof state.formulaDetailsOpen === "boolean") {
+        document.getElementById("formulaDetails").open = state.formulaDetailsOpen;
+      }
+    }
+
     function readSettingsFromForm() {
-      const currentCoinsInput = document.getElementById("currentCoins").value.trim();
-      const currentCoins = currentCoinsInput === "" ? 0 : parseIntegerField(currentCoinsInput);
+      const currentCoins = parseNonNegativeIntegerOrZero(document.getElementById("currentCoins").value);
       if (!Number.isInteger(currentCoins) || currentCoins < 0) {
         throw new Error("現在の戦術対抗戦コイン数は0以上の整数で入力してください。");
       }
@@ -1191,7 +1394,7 @@
 
       let dailyIncome;
       if (dailyIncomeChoice.value === "other") {
-        dailyIncome = parseIntegerField(document.getElementById("customDailyIncome").value);
+        dailyIncome = parseNonNegativeIntegerOrZero(document.getElementById("customDailyIncome").value);
         if (!Number.isInteger(dailyIncome) || dailyIncome < 0) {
           throw new Error("「その他」の毎日のコイン収入は0以上の整数で入力してください。");
         }
@@ -1199,12 +1402,12 @@
         dailyIncome = Number(dailyIncomeChoice.value);
       }
 
-      const apOneWeeks = parseIntegerField(document.getElementById("apOneWeeks").value);
+      const apOneWeeks = parseNonNegativeIntegerOrZero(document.getElementById("apOneWeeks").value);
       if (!Number.isInteger(apOneWeeks) || apOneWeeks < 0) {
         throw new Error("APドリンク1セットの週数は0以上の整数で入力してください。");
       }
 
-      const apFourWeeks = parseIntegerField(document.getElementById("apFourWeeks").value);
+      const apFourWeeks = parseNonNegativeIntegerOrZero(document.getElementById("apFourWeeks").value);
       if (!Number.isInteger(apFourWeeks) || apFourWeeks < 0) {
         throw new Error("APドリンク4セットの週数は0以上の整数で入力してください。");
       }
@@ -1262,20 +1465,17 @@
       const bufferPolicy = BUFFER_POLICIES[settings.bufferPolicy];
       const bufferReserve = bufferPolicy.calculate(settings.dailyIncome);
       const exchangeableCoins = balance - additionalReserve - bufferReserve;
-      const purchasedCharacters = settings.dailyCharacterPurchase === "none"
-        ? 0
-        : 5 * records.length;
-      const characterPurchaseLabel = settings.dailyCharacterPurchase === "one"
+      const characterPurchaseMultiplier = settings.dailyCharacterPurchase === "two" ? 2 : settings.dailyCharacterPurchase === "one" ? 1 : 0;
+      const purchasedCharacters = characterPurchaseMultiplier > 0 ? 5 * records.length : 0;
+      const characterPurchaseLabel = characterPurchaseMultiplier === 1
         ? "毎日1名分の文字購入"
-        : settings.dailyCharacterPurchase === "two"
+        : characterPurchaseMultiplier === 2
           ? "毎日2名分の文字購入"
           : "";
 
       return {
         records,
         dailyExpense,
-        dailyDrinkExpense,
-        dailyCharacterExpense,
         days: records.length,
         totalIncome: settings.dailyIncome * records.length,
         totalExpense: dailyExpense * records.length,
@@ -1283,11 +1483,10 @@
         additionalReserve,
         bufferReserve,
         exchangeableCoins,
-        bufferLabel: bufferPolicy.label,
         bufferSummaryLabel: bufferPolicy.summaryLabel,
-        bufferFormula: bufferPolicy.formula,
         purchasedCharacters,
-        characterPurchaseLabel
+        characterPurchaseLabel,
+        characterPurchaseMultiplier
       };
     }
 
@@ -1311,7 +1510,7 @@
         <article class="summary-card primary" data-tone="${result.exchangeableCoins < 0 ? "negative" : "positive"}">
           <p>文字交換に使用してよい対抗戦コイン</p>
           <strong>${formatNumber(result.exchangeableCoins)}</strong>
-          <span>最終日の残数から、追加AP確保分と余力を差し引いた値</span>
+          <span>${getExchangeableSummaryText(result.exchangeableCoins)}</span>
         </article>
         <article class="summary-card" data-tone="${result.finalBalance < 0 ? "negative" : "positive"}">
           <p>最終日の残数</p>
@@ -1370,7 +1569,9 @@
       );
 
       if (result.purchasedCharacters > 0) {
-        chips.push(`<span class="chip">購入文字数 ${formatNumber(result.purchasedCharacters)}</span>`);
+        chips.push(
+          `<span class="chip">購入文字数 ${formatNumber(result.purchasedCharacters)}（×${result.characterPurchaseMultiplier}名分）</span>`
+        );
       }
 
       conditionChips.innerHTML = chips.join("");
@@ -1419,6 +1620,11 @@
       }
     }
 
+    function persistAndRender() {
+      savePersistedState();
+      recalculateAndRender();
+    }
+
     function updateOtherIncomeState() {
       const customDailyIncome = document.getElementById("customDailyIncome");
       const selected = document.querySelector('input[name="dailyIncome"]:checked');
@@ -1435,6 +1641,22 @@
       customDateFields.hidden = !useCustomDates;
     }
 
+    function setStepperValue(input, value) {
+      input.value = formatInputValueOrBlank(Math.max(0, value));
+    }
+
+    function stepInputValue(targetId, delta) {
+      const input = document.getElementById(targetId);
+      if (!input) {
+        return;
+      }
+
+      const currentValue = parseNonNegativeIntegerOrZero(input.value);
+      const safeCurrentValue = Number.isInteger(currentValue) && currentValue >= 0 ? currentValue : 0;
+      setStepperValue(input, safeCurrentValue + delta);
+      persistAndRender();
+    }
+
     function setDefaultDates() {
       const startDateInput = document.getElementById("startDate");
       const endDateInput = document.getElementById("endDate");
@@ -1449,36 +1671,37 @@
 
     function initApp() {
       setDefaultDates();
+      applyPersistedState(restorePersistedState());
       updateOtherIncomeState();
       updatePeriodModeState();
       recalculateAndRender();
 
       const form = document.getElementById("plannerForm");
+      const stepperButtons = document.querySelectorAll("[data-step-target]");
+      const detailsList = [
+        document.getElementById("dailyTableDetails"),
+        document.getElementById("formulaDetails")
+      ].filter(Boolean);
 
       form.addEventListener("submit", (event) => {
         event.preventDefault();
-        recalculateAndRender();
       });
 
       form.addEventListener("change", (event) => {
         if (!(event.target instanceof HTMLInputElement)) {
-          recalculateAndRender();
+          persistAndRender();
           return;
         }
 
         if (event.target.name === "dailyIncome") {
           updateOtherIncomeState();
-          if (event.target.value === "other" && document.getElementById("customDailyIncome").value.trim() === "") {
-            clearError();
-            return;
-          }
         }
 
         if (event.target.name === "periodMode") {
           updatePeriodModeState();
         }
 
-        recalculateAndRender();
+        persistAndRender();
       });
 
       form.addEventListener("input", (event) => {
@@ -1488,16 +1711,26 @@
 
         if (event.target.name === "dailyIncome") {
           updateOtherIncomeState();
-          return;
         }
 
-        if (event.target.id === "customDailyIncome") {
-          if (event.target.value.trim() === "") {
-            clearError();
+        persistAndRender();
+      });
+
+      stepperButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const targetId = button.getAttribute("data-step-target");
+          const delta = Number(button.getAttribute("data-step-delta"));
+          if (!targetId || !Number.isFinite(delta)) {
             return;
           }
-          recalculateAndRender();
-        }
+          stepInputValue(targetId, delta);
+        });
+      });
+
+      detailsList.forEach((details) => {
+        details.addEventListener("toggle", () => {
+          savePersistedState();
+        });
       });
     }
 
