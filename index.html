@@ -987,8 +987,8 @@
           </div>
 
           <div class="field-card">
-            <h3>追加のAPドリンク購入期間</h3>
-            <p class="field-helper">追加でAPドリンクを何週間購入するかを入力します。集計期間最終日の残数から別枠で差し引きます。</p>
+            <h3>APドリンク購入を増やす期間</h3>
+            <p class="field-helper">通常の毎日1セット購入と重複しないよう、差額分だけを最終日の残数から別枠で差し引きます。</p>
             <div class="mini-grid">
               <div class="mini-card">
                 <strong>APドリンク1セット<br>(45コイン)</strong>
@@ -1002,7 +1002,7 @@
                 </div>
               </div>
               <div class="mini-card">
-                <strong>APドリンク4セット<br>(210コイン)</strong>
+                <strong>APドリンク4セットまで<br>(210コイン)</strong>
                 <div class="stepper-field">
                   <span class="mini-label">週数</span>
                   <div class="stepper-controls">
@@ -1076,8 +1076,9 @@
           <div class="details-body">
             <p>初日: 残数 = 現在の戦術対抗戦コイン数 + 毎日のコイン収入 - (毎日ドリンク1セット購入の支出 + 毎日文字購入の支出)</p>
             <p>2日目以降: 残数 = 前日の残数 + 毎日のコイン収入 - (毎日ドリンク1セット購入の支出 + 毎日文字購入の支出)</p>
-            <p>文字交換に使用してよい対抗戦コイン = 最終日の残数 - 追加のAPドリンク購入期間 - 余力</p>
-            <p>追加のAPドリンク購入期間 = APドリンク1セットの週数 × 7 × 45 + APドリンク4セットの週数 × 7 × 210</p>
+            <p>文字交換に使用してよい対抗戦コイン = 最終日の残数 - APドリンク追加負担分 - 余力</p>
+            <p>APドリンク追加負担分 = APドリンク1セットの週数 × 7 × (45 - 通常1セット支出) + APドリンク4セットの週数 × 7 × (210 - 通常1セット支出)</p>
+            <p>通常1セット支出 = 毎日ドリンク1セット購入がONなら45、OFFなら0</p>
             <p>余力: 使い切ってヨシ！ = 0</p>
             <p>余力: 2週間のドリンク4セット = (2 × 7 × 210) - (14 × 毎日のコイン収入)</p>
             <p>余力: 3週間のドリンク4セット = (3 × 7 × 210) - (21 × 毎日のコイン収入)</p>
@@ -1495,9 +1496,11 @@
         cursor = addDays(cursor, 1);
       }
 
+      const additionalApOneDailyExpense = Math.max(45 - dailyDrinkExpense, 0);
+      const additionalApFourDailyExpense = Math.max(210 - dailyDrinkExpense, 0);
       const additionalReserve =
-        settings.apOneWeeks * 7 * 45 +
-        settings.apFourWeeks * 7 * 210;
+        settings.apOneWeeks * 7 * additionalApOneDailyExpense +
+        settings.apFourWeeks * 7 * additionalApFourDailyExpense;
       const bufferPolicy = BUFFER_POLICIES[settings.bufferPolicy];
       const bufferReserve = bufferPolicy.calculate(settings.dailyIncome);
       const exchangeableCoins = balance - additionalReserve - bufferReserve;
@@ -1517,6 +1520,8 @@
         totalExpense: dailyExpense * records.length,
         finalBalance: balance,
         additionalReserve,
+        additionalApOneDailyExpense,
+        additionalApFourDailyExpense,
         bufferReserve,
         exchangeableCoins,
         bufferSummaryLabel: bufferPolicy.summaryLabel,
@@ -1554,9 +1559,9 @@
           <span>${formatNumber(settings.currentCoins)}から${result.days}日ぶんを積み上げた結果</span>
         </article>
         <article class="summary-card" data-tone="${result.additionalReserve < 0 ? "negative" : "positive"}">
-          <p>追加のAPドリンク購入期間</p>
+          <p>APドリンク追加負担分</p>
           <strong>${formatNumber(result.additionalReserve)}</strong>
-          <span>1セット ${settings.apOneWeeks}週 / 4セット ${settings.apFourWeeks}週</span>
+          <span>1セット ${settings.apOneWeeks}週(${formatNumber(result.additionalApOneDailyExpense)}/日) / 4セット ${settings.apFourWeeks}週(${formatNumber(result.additionalApFourDailyExpense)}/日)</span>
         </article>
         <article class="summary-card" data-tone="${result.bufferReserve < 0 ? "negative" : "positive"}">
           <p>集計期間後のコイン余力</p>
@@ -1574,7 +1579,7 @@
         <div class="formula-operator">-</div>
         <div class="formula-term">
           <strong>${formatNumber(result.additionalReserve)}</strong>
-          <span>追加AP確保分</span>
+          <span>追加AP負担分</span>
         </div>
         <div class="formula-operator">-</div>
         <div class="formula-term">
