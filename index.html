@@ -420,6 +420,12 @@
       line-height: 1.5;
     }
 
+    .mini-grid .mini-card {
+      display: grid;
+      grid-template-rows: minmax(64px, auto) 1fr;
+      align-content: start;
+    }
+
     .stepper-field {
       display: grid;
       gap: 8px;
@@ -845,6 +851,10 @@
 
       .income-option-wide {
         grid-template-columns: 1fr;
+      }
+
+      .mini-grid .mini-card {
+        display: block;
       }
 
       .stepper-controls {
