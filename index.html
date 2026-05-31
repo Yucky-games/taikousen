@@ -11,6 +11,13 @@
     gtag("js", new Date());
     gtag("config", "G-1LGHNLCS2B");
   </script>
+  <script>
+    window.PendakoAnalytics = {
+      appId: "ba_taikousen_coin",
+      version: "0.1.0"
+    };
+  </script>
+  <script defer src="https://analytics.pendako.workers.dev/pendako.js"></script>
   <title>対抗戦コイン ミツモルさん | ブルーアーカイブ 戦術対抗戦コイン収支シミュレーター</title>
   <meta
     name="description"
@@ -995,9 +1002,9 @@
                 <div class="stepper-field">
                   <span class="mini-label">週数</span>
                   <div class="stepper-controls">
-                    <button class="stepper-button" type="button" data-step-target="apOneWeeks" data-step-delta="-1" aria-label="APドリンク1セットの週数を1減らす">-</button>
+                    <button class="stepper-button" type="button" data-step-target="apOneWeeks" data-step-delta="-1" data-pa-event="ap_one_stepper_click" aria-label="APドリンク1セットの週数を1減らす">-</button>
                     <input id="apOneWeeks" class="stepper-input" name="apOneWeeks" type="number" min="0" step="1" inputmode="numeric" value="" placeholder="0">
-                    <button class="stepper-button" type="button" data-step-target="apOneWeeks" data-step-delta="1" aria-label="APドリンク1セットの週数を1増やす">+</button>
+                    <button class="stepper-button" type="button" data-step-target="apOneWeeks" data-step-delta="1" data-pa-event="ap_one_stepper_click" aria-label="APドリンク1セットの週数を1増やす">+</button>
                   </div>
                 </div>
               </div>
@@ -1006,9 +1013,9 @@
                 <div class="stepper-field">
                   <span class="mini-label">週数</span>
                   <div class="stepper-controls">
-                    <button class="stepper-button" type="button" data-step-target="apFourWeeks" data-step-delta="-1" aria-label="APドリンク4セットの週数を1減らす">-</button>
+                    <button class="stepper-button" type="button" data-step-target="apFourWeeks" data-step-delta="-1" data-pa-event="ap_four_stepper_click" aria-label="APドリンク4セットの週数を1減らす">-</button>
                     <input id="apFourWeeks" class="stepper-input" name="apFourWeeks" type="number" min="0" step="1" inputmode="numeric" value="" placeholder="0">
-                    <button class="stepper-button" type="button" data-step-target="apFourWeeks" data-step-delta="1" aria-label="APドリンク4セットの週数を1増やす">+</button>
+                    <button class="stepper-button" type="button" data-step-target="apFourWeeks" data-step-delta="1" data-pa-event="ap_four_stepper_click" aria-label="APドリンク4セットの週数を1増やす">+</button>
                   </div>
                 </div>
               </div>
@@ -1050,7 +1057,7 @@
         <div id="conditionChips" class="chip-row"></div>
 
         <div class="results-block">
-          <details id="dailyTableDetails">
+          <details id="dailyTableDetails" data-pa-event="daily_table_toggle">
             <summary>日次集計表</summary>
             <div class="details-body details-body-table">
               <div id="tableMeta" class="table-meta"></div>
@@ -1071,7 +1078,7 @@
           </details>
         </div>
 
-        <details id="formulaDetails">
+        <details id="formulaDetails" data-pa-event="formula_toggle">
           <summary>実装している計算式をみる</summary>
           <div class="details-body">
             <p>初日: 残数 = 現在の戦術対抗戦コイン数 + 毎日のコイン収入 - (毎日ドリンク1セット購入の支出 + 毎日文字購入の支出)</p>
